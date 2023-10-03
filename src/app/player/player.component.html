@@ -1,0 +1,20 @@
+<div class="player-container">
+    <div class="cover-art">
+        <img [src]="songs[currentIndex].coverArt" alt="Cover Art">
+    </div>
+    <div class="controls-container">
+        <div class="song-info">{{ songs[currentIndex].title }}</div>
+        <div class="progress-bar">
+            <div [style.width.%]="progress"></div>
+        </div>
+        <div class="buttons">
+            <button (click)="previous()"><i class="fas fa-backward"></i></button>
+            <button (click)="playPause()"><i class="fas" [ngClass]="{'fa-play': !isPlaying, 'fa-pause': isPlaying}"></i></button>
+            <button (click)="next()"><i class="fas fa-forward"></i></button>
+        </div>
+    </div>
+</div>
+<div class="footer">
+    <p>v 1.1</p>
+</div>
+
