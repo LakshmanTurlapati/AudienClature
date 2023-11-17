@@ -1,70 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-
-interface SpotifyAuthResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-  // Add any other expected properties if needed
-}
-interface SpotifyPlaylistTrack {
-  track: {
-      name: string;
-      album: {
-          images: { url: string }[];
-      };
-      uri: string;
-  };
-}
-
-interface SpotifyPlaylistResponse {
-  items: SpotifyPlaylistTrack[];
-}
-interface SpotifyError {
-  message: string;
-}
-interface SpotifyDeviceEvent {
-  device_id: string;
-}
-interface SpotifyPlayerState {
-  context: {
-      uri: string;
-      metadata: any;
-  };
-  disallows: {
-      pausing: boolean;
-      skipping_prev: boolean;
-  };
-  duration: number;
-  paused: boolean;
-  position: number;
-  repeat_mode: number;
-  shuffle: boolean;
-  track_window: {
-      current_track: {
-          album: {
-              uri: string;
-              name: string;
-              images: [{ url: string }];
-              // ... more album properties if needed
-          };
-          artists: [
-              {
-                  uri: string;
-                  name: string;
-              }
-          ];
-          duration_ms: number;
-          uri: string;
-          name: string;
-          // ... more track properties if needed
-      };
-      next_tracks: Array<any>; // Similarly structured to current_track
-      previous_tracks: Array<any>; // Similarly structured to current_track
-  };
-}
-
-
+import { Component, OnInit, Renderer2, ElementRef, ViewChild,EventEmitter,Output } from '@angular/core';
+import { NgZone } from '@angular/core';
+import { StyleManagerService } from '../services/style-manager.service';
 
 
 @Component({
@@ -73,135 +9,219 @@ interface SpotifyPlayerState {
   styleUrls: ['./player.component.scss']
 })
 export class PlayerComponent implements OnInit {
-    currentIndex = 0;
-    isPlaying = false;
-    progress = 0;
-    songs: any[] = [];
-    deviceId!: string;
+    @ViewChild('seekBar', { static: false }) seekBar!: ElementRef<HTMLInputElement>;
+    @ViewChild('coverArt') coverArt!: ElementRef;
+    @Output() backgroundStyleChange = new EventEmitter<string>();
 
 
-    // Spotify configurations
-    clientId = 'REMOVED_SPOTIFY_CLIENT_ID';
-    clientSecret = 'REMOVED_SPOTIFY_CLIENT_SECRET';
-    token: string = '';
-    player: any;
 
-    constructor(private http: HttpClient) {}
+  currentIndex = 0;
+  isPlaying = false;
+  currentTime = 0; // Current time in seconds
+  duration = 0; // Duration in seconds
+  audio = new Audio();
+  progress = 0; 
+  backgroundStyle: string = 'linear-gradient(to right, #000000, #1a1a1a)'; // Default background
+  playerStyle: string = 'rgba(0, 0, 0, 0.5)';
+  
 
-    ngOnInit() {
-        this.authenticateAndSetupPlayer();
+
+  songs: any[] = [
+    {
+      title: 'Sunflower',
+      artist: 'Post Malone, Swae Lee',
+      src: 'assets/media/audio/sunflower.mp3',
+      cover: 'assets/media/cover/sunflower.jpeg'
+    },
+    {
+        title: "I Ain't Worried",
+        artist: 'OneRepublic',
+        src: 'assets/media/audio/iaintworried.mp3', 
+        cover: 'assets/media/cover/iaintworried.jpeg'
+      },
+      {
+        title: "Am I Dreaming",
+        artist: 'Metro Boomin',
+        src: 'assets/media/audio/amidreaming.mp3', 
+        cover: 'assets/media/cover/amidreaming.jpeg'
+      },
+      {
+        title: "Wrapped around your finger",
+        artist: 'Post Malone',
+        src: 'assets/media/audio/wrappedaroundyourfinger.mp3', 
+        cover: 'assets/media/cover/wrappedaroundyourfinger.jpeg'
+      }
+    // ... other songs
+  ];
+
+  constructor(private renderer: Renderer2, private zone: NgZone,private styleManager: StyleManagerService,
+    ) {
+    // Bind the context of `this` to the event handlers
+    this.audio.addEventListener('timeupdate', this.updateTime.bind(this));
+    this.audio.addEventListener('loadedmetadata', this.updateDuration.bind(this));
+    this.audio.addEventListener('ended', this.onSongEnd.bind(this));
+    
+  }
+
+  ngOnInit() {
+    this.audio.src = this.songs[this.currentIndex].src;
+    this.audio.load();
+  }
+
+  play() {
+    this.isPlaying = true;
+    this.audio.play();
+  }
+
+  playPause() {
+    if (this.isPlaying) {
+      this.pause();
+    } else {
+      this.play();
     }
+  }
 
-    authenticateAndSetupPlayer() {
-      // Fetch the access token
-      this.http.post<SpotifyAuthResponse>('https://accounts.spotify.com/api/token', 
-          'grant_type=client_credentials',
-          {
-              headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded',
-                  'Authorization': 'Basic ' + btoa(this.clientId + ':' + this.clientSecret)
-              }
-          }
-      ).subscribe(data => {
-          this.token = data.access_token;
-          this.setupSpotifyPlayer();
-          this.fetchPlaylistDetails();
-      });
+  next() {
+    // Check if the next song index is within the bounds of the songs array
+    if (this.currentIndex < this.songs.length - 1) {
+      this.currentIndex++; // Increment the index to go to the next song
+    } else {
+      this.currentIndex = 0; // Loop back to the first song
+    }
+    this.loadSong();
+  }
+
+
+  previous() {
+    // Check if the previous song index is within the bounds of the songs array
+    if (this.currentIndex > 0) {
+      this.currentIndex--; // Decrement the index to go to the previous song
+    } else {
+      this.currentIndex = this.songs.length - 1; // Loop back to the last song
+    }
+    this.loadSong();
+  }
+  onSongEnd() {
+    this.next(); 
+  }
+  loadSong() {
+    this.audio.pause();
+    this.audio.currentTime = 0;
+  
+    const selectedSong = this.songs[this.currentIndex];
+    this.audio.src = selectedSong.src;
+    
+   
+    this.audio.load();
+    this.isPlaying = true;
+    this.audio.play();
+  
+    this.currentTime = 0;
+    this.updateDuration();
+  }
+  
+  updateDuration() {
+    this.zone.run(() => {
+      this.duration = this.audio.duration;
+      this.updateProgress(); // Update progress bar whenever duration changes
+    });
+  }
+  
+  ngOnDestroy() {
+    this.audio.pause();
+    this.audio.removeEventListener('timeupdate', this.updateTime.bind(this));
+    this.audio.removeEventListener('loadedmetadata', this.updateDuration.bind(this));
+    this.audio.removeEventListener('ended', this.onSongEnd.bind(this));
   }
   
 
-  fetchPlaylistDetails() {
-    const playlistId = '37i9dQZF1DXcrFZ8UTtxv9';
-    this.http.get<SpotifyPlaylistResponse>(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
-        headers: {
-            'Authorization': 'Bearer ' + this.token
-        }
-    }).subscribe(data => {
-        this.songs = data.items.map(item => ({
-            title: item.track.name,
-            coverArt: item.track.album.images[0].url,
-            uri: item.track.uri
-        }));
+  pause() {
+    this.isPlaying = false;
+    this.audio.pause();
+  }
+
+  updateTime() {
+    this.zone.run(() => {
+      this.currentTime = this.audio.currentTime;
+      this.updateProgress();
     });
+  }
+
+  updateBackground(color: string) {
+    this.backgroundStyle = `linear-gradient(to right, ${color}, #1a1a1a)`;
+    this.backgroundStyleChange.emit(this.backgroundStyle); 
+    this.styleManager.setBackgroundStyle(this.backgroundStyle);
+
+
+  }
+
+  onCoverArtLoad() {
+    if (this.coverArt && this.coverArt.nativeElement.complete) {
+      // Once the cover art has loaded, call the getDominantColor function
+      this.getDominantColor(this.coverArt.nativeElement);
+      
+    }
+  }
+
+    updatePlayerBackground(color: string) {
+        // Create a darker shade of the dominant color
+        
+      }
+
+  
+
+  getDominantColor(imgElement: HTMLImageElement) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return; // Exit if canvas context is not available
+
+    canvas.width = imgElement.width;
+    canvas.height = imgElement.height;
+    ctx.drawImage(imgElement, 0, 0);
+
+    // Get the pixel data from the canvas
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    let r = 0, g = 0, b = 0, count = 0;
+
+    for (let i = 0; i < data.length; i += 4) {
+      r += data[i];
+      g += data[i + 1];
+      b += data[i + 2];
+      count++;
+    }
+
+    // Calculate the average color
+    r = Math.floor(r / count);
+    g = Math.floor(g / count);
+    b = Math.floor(b / count);
+
+    // Update the background with the new color
+    this.zone.run(() => {
+      this.updateBackground(`rgb(${r},${g},${b})`);
+    });
+  }
+
+
+  
+
+  seekTo(event: any) {
+    const seekTime = event.target.value;
+    this.audio.currentTime = seekTime;
+    this.currentTime = seekTime;
+  }
+
+ updateProgress() {
+  this.progress = (this.currentTime / this.duration) * 100;
+  if (this.seekBar && this.seekBar.nativeElement) {
+    this.renderer.setStyle(this.seekBar.nativeElement, 'background', `linear-gradient(to right, #1DB954 0%, #1DB954 ${this.progress}%, #444 ${this.progress}%, #444 100%)`);
+  }
 }
-
-
-    setupSpotifyPlayer() {
-        if (window['Spotify']) {
-            this.initializePlayer();
-        } else {
-            setTimeout(() => this.setupSpotifyPlayer(), 1000);
-        }
-    }
-
-    initializePlayer() {
-      this.player = new window['Spotify'].Player({
-          name: 'Your Angular Spotify Player',
-          getOAuthToken: (cb: (token: string) => void) => { cb(this.token); }
-      });
-  
-      // Error handling
-      this.player.addListener('initialization_error', ({ message }: SpotifyError) => { console.error(message); });
-      this.player.addListener('authentication_error', ({ message }: SpotifyError) => { console.error(message); });
-      this.player.addListener('account_error', ({ message }: SpotifyError) => { console.error(message); });
-      this.player.addListener('playback_error', ({ message }: SpotifyError) => { console.error(message); });
-  
-      // Playback status updates
-      this.player.addListener('player_state_changed', (state: SpotifyPlayerState) => {
-        console.log(state);
-    });
-    
-  
-      // Ready
-      this.player.addListener('ready', ({ device_id }: SpotifyDeviceEvent) => {
-        console.log('Ready with Device ID', device_id);
-        this.deviceId = device_id;
-    });
-    
-  
-      // Not Ready
-    this.player.addListener('not_ready', ({ device_id }: SpotifyDeviceEvent) => {
-    console.log('Device ID has gone offline', device_id);
-});
-
-  
-      // Connect to the player
-      this.player.connect();
+formatTime(timeInSeconds: number): string {
+    const minutes: string = Math.floor(timeInSeconds / 60).toString().padStart(2, '0');
+    const seconds: string = Math.floor(timeInSeconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
   }
   
-
-    playPause() {
-        if (this.isPlaying) {
-            this.player.pause().then(() => {
-                console.log('Paused Playback');
-                this.isPlaying = false;
-            });
-        } else {
-            this.player.resume().then(() => {
-                console.log('Resumed Playback');
-                this.isPlaying = true;
-            });
-        }
-    }
-
-    playTrack(uri: string) {
-        this.http.put(`https://api.spotify.com/v1/me/player/play?device_id=${this.deviceId}`, 
-        { uris: [uri] }, 
-        {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.token}`
-            }
-        }).subscribe();
-    }
-
-    next() {
-        this.currentIndex = (this.currentIndex + 1) % this.songs.length;
-        this.playTrack(this.songs[this.currentIndex].uri);
-    }
-
-    previous() {
-        this.currentIndex = (this.currentIndex - 1 + this.songs.length) % this.songs.length;
-        this.playTrack(this.songs[this.currentIndex].uri);
-    }
+  
 }

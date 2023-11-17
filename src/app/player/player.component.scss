@@ -5,7 +5,7 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: linear-gradient(to right, #000000, #1a1a1a);
+    // background: linear-gradient(to right, #000000, #1a1a1a);
 }
 
 .player-container {
@@ -14,9 +14,11 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px;
+    backdrop-filter: blur(20px);
     border-radius: 15px;
     box-shadow: 0px 0px 15px 5px rgba(0, 0, 0, 0.1);
-    background-color: #282828;
+ 
+    -webkit-backdrop-filter: blur(10px); /* For Safari */
     width: 80%; // Adjust width as needed
     max-width: 300px; // Adjust max-width as needed
 }
@@ -30,28 +32,116 @@
 }
 
 .controls-container {
+    position: relative;
+  width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-
 .song-info {
     color: #fff;
-    margin-bottom: 10px;
-}
-
-.progress-bar {
+    margin-bottom: 20px;
+    text-align: center; 
+    word-wrap: break-word; 
     width: 90%;
-    height: 5px; // Increased height for wider progress bar
-    background: #444;
-    position: relative;
-    margin-bottom: 15px; // Adjusted margin for spacing
+  
+    .artist-name {
+        position: absolute;
+      left: 10%;
+      font-size: 0.75em;
+      display: flex; // Use flexbox to center the text
+      justify-content: center; // Center text horizontally
+      align-items: center; // Center text vertically
+      height: 1.5em; // Give some height to the artist name container
+      white-space: nowrap;
+      overflow: hidden;
+    
+      width: 90%; // Artist name takes full width of its container
+  
+      // Scrolling span
+      span.scrolling {
+        position: absolute;
+        white-space: nowrap;
+        animation: scrollArtist 20s linear infinite;
+      }
+    }
+  }
+  
+  // Make sure the progress bar container has the same width as .song-info
+  
+  
+
+  
+  // Keyframes for the scrolling animation
+  @keyframes scrollArtist {
+    0%, 100% {
+      transform: translateX(100%);
+    }
+    50% {
+      transform: translateX(-100%);
+    }
+  }
+  
+  .time-and-progress {
+    display: flex;
+    flex-direction: column; // Stack elements vertically
+    width: 100%;
+}
+  
+  .seek-bar {
+    -webkit-appearance: none; /* Override default styles for range inputs */
+    width: 90%; /* Match the progress bar's width */
+    height: 5px; /* Match the progress bar's height */
+    background: #444; /* Unfilled part of the seek bar */
+    cursor: pointer; /* Hand cursor on hover */
+    margin-bottom: 15px; /* Space below the seek bar */
+    border-radius: 2.5px; /* Adjust if you want rounded corners */
+  
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none; /* Hide the thumb */
+      height: 0;
+      width: 0;
+      background: transparent;
+    }
+  
+    &::-moz-range-thumb {
+      -webkit-appearance: none; /* Hide the thumb */
+      height: 0;
+      width: 0;
+      background: transparent;
+    }
+    
+    &::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, #1DB954 0%, #1DB954 var(--progress), #444 var(--progress), #444 100%);
+    }
+  
+    &::-moz-range-track {
+      background: linear-gradient(to right, #1DB954 0%, #1DB954 var(--progress), #444 var(--progress), #444 100%);
+    }
+  }
+  .timestamps {
+    position: absolute; // Position the timestamps absolutely within .time-and-progress
+    width: 90%; // Span the full width of the parent container
+    
+    margin-top: 2px; // Align to the left edge of the parent container
+    display: flex;
+    justify-content: space-between; // Space out current time and total duration
+    padding: 0 5px; // Add padding to prevent the timestamps from touching the edges
+    box-sizing: border-box; // Include padding in the width calculation
+    font-size: 0.65em; // Reduced font size for timestamps
 }
 
-.progress-bar div {
-    height: 100%;
-    background: #1DB954;
+.current-time {
+    position: absolute; // Position absolutely to the left
+    left: 0; // Align to the left edge
+    bottom: -20px; // Position below the seek bar
+}
+
+.total-duration {
+    position: absolute; // Position absolutely to the right
+    right: 0; // Align to the right edge
+    bottom: -20px; // Position below the seek bar
 }
 
 .buttons {
@@ -89,3 +179,16 @@ button:hover {
     font-size: 8px!important;
     width: 100%;
 }
+.time-and-progress {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+    
+    .current-time,
+    .total-duration {
+      color: #fff;
+      // Additional styling for the time text
+    }
+}
+  
