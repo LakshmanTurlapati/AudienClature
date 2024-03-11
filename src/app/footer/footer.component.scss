@@ -1,0 +1,50 @@
+.footer {
+    position: absolute; // Fix the footer to the bottom of the screen
+    bottom: 0;
+    left: 0;
+    width: 100%; // Full width of the viewport
+    font-size: 12px; // Readable font size
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: transparent; // Match the background
+    color: grey; // Styling for the text
+  
+    p {
+        display: inline-block;
+    }
+  
+    .version-container {
+        position: relative; // Container for version text and globe icon
+        display: inline-block;
+        cursor: pointer; // Change cursor to pointer to indicate it's clickable
+    }
+  
+    .version-text, .version-link {
+        position: absolute;
+        white-space: nowrap; // Prevents the text from wrapping
+  
+        top: 0;
+        left: 0;
+    }
+  
+    .version-link i.fas.fa-globe {
+        color: grey; // Set the color of the globe icon
+        font-size: 20px;
+        margin-left: 5px; // Set the font size of the globe icon
+    }
+  }
+
+  @media (max-width: 600px) {
+    .footer {
+    position: fixed; // Fix the footer to the bottom of the screen
+    bottom: 0;
+    left: 0;
+    width: 100%; // Full width of the viewport
+    font-size: 12px; // Readable font size
+    text-align: center;
+    padding: 10px;
+    background-color: transparent; // Match the background
+    color: grey; // Styling for the text
+}
+}

@@ -7,7 +7,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PlayerComponent } from './player/player.component';
 import { FooterComponent } from './footer/footer.component';
-import { FormsModule } from '@angular/forms'; // Import FormsModule here
+import { FormsModule } from '@angular/forms';
+import { SphereComponent } from './sphere/sphere.component'; // Import FormsModule here
 
 
 
@@ -16,6 +17,7 @@ import { FormsModule } from '@angular/forms'; // Import FormsModule here
     AppComponent,
     PlayerComponent,
     FooterComponent,
+    SphereComponent,
  
   ],
   imports: [

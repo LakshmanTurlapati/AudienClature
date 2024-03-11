@@ -5,6 +5,9 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    
+    padding-bottom: 50px; // Add some padding to account for the footer
+    box-sizing: border-box; 
     // background: linear-gradient(to right, #000000, #1a1a1a);
 }
 
@@ -170,15 +173,10 @@ button:hover {
 button:hover {
     color: #1DB954;
 }
-.footer {
-    text-align: center;
-    padding: 10px;
-    margin-top:50%!important;
-    background-color: transparent;
-    color: grey;
-    font-size: 8px!important;
-    width: 100%;
-}
+
+
+// ... keep other styles, including media queries
+
 .time-and-progress {
     display: flex;
     justify-content: space-between;
@@ -191,4 +189,73 @@ button:hover {
       // Additional styling for the time text
     }
 }
-  
+
+// Mobile view adjustments
+@media (max-width: 600px) { // Adjust this breakpoint as needed
+    .player-container {
+        position: relative; // Keep relative for natural document flow
+        flex-direction: column; // Stack items vertically
+        align-items: center; // Center items
+        justify-content: flex-start; // Align content to the top
+        width: auto; // Allow intrinsic width based on content
+        max-width: 340px; // Max width to not occupy full screen width
+        margin: 20px; // Margin to keep background visible around the player
+        margin-top: 70px;
+        padding: 20px; // Padding inside the player container
+        backdrop-filter: blur(20px); // Aesthetic backdrop blur
+        border-radius: 15px; // Rounded corners for the container
+        box-shadow: 0px 0px 15px 5px rgba(0, 0, 0, 0.1); // Box shadow for depth
+        -webkit-backdrop-filter: blur(10px); // For Safari
+    }
+
+    .cover-art img {
+        width: 100%; // Full width within the container
+        max-width: 200px; // Max width to control the size of the image
+        height: auto; // Maintain aspect ratio
+        object-fit: cover; // Cover the area without losing aspect ratio
+        border-radius: 10px; // Rounded corners for the image
+        margin-bottom: 20px; // Space between cover art and controls
+    }
+
+    .controls-container {
+        width: calc(100% - 40px); // Full width minus the padding on the sides
+        // Existing styles...
+    }
+
+    .song-info {
+        width: 100%; // Allow the song info to take full width
+        // Adjust the title and artist name to fit within the new layout
+        .artist-name {
+            position: relative; // Keep relative to the parent container
+            left: 0; // Reset any left positioning
+            justify-content: center; // Center artist name
+            width: 100%; // Full width to accommodate longer artist names
+            margin-top: 5px; // Space between title and artist name
+        }
+    }
+
+    .time-and-progress {
+        width: 100%; // Full width for the time and progress container
+        flex-direction: column; // Stack time and progress bar
+        align-items: center; // Align to the center of the container
+    }
+
+    .buttons {
+        width: 100%; // Full width to align buttons properly
+        justify-content: space-around; // Evenly space buttons
+        margin-top: 20px; // Space above the buttons
+    }
+
+    .footer {
+        position: fixed; // Fix the footer to the bottom of the screen
+        bottom: 0;
+        left: 0;
+        width: 100%; // Full width of the viewport
+        font-size: 12px; // Readable font size
+        text-align: center;
+        padding: 10px;
+        background-color: transparent; // Match the background
+        color: grey; // Styling for the text
+    }
+}
+

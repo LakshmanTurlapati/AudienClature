@@ -14,7 +14,7 @@ export class PlayerComponent implements OnInit {
     @Output() backgroundStyleChange = new EventEmitter<string>();
 
 
-
+  showGlobe = false;
   currentIndex = 0;
   isPlaying = false;
   currentTime = 0; // Current time in seconds
@@ -24,8 +24,9 @@ export class PlayerComponent implements OnInit {
   backgroundStyle: string = 'linear-gradient(to right, #000000, #1a1a1a)'; // Default background
   playerStyle: string = 'rgba(0, 0, 0, 0.5)';
   
-
-
+  toggleGlobeVisibility() {
+    this.showGlobe = !this.showGlobe;
+}
   songs: any[] = [
     {
       title: 'Sunflower',

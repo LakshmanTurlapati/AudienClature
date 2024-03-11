@@ -1,0 +1,13 @@
+<!-- footer.component.html -->
+<div class="footer">
+    <p>
+        <span class="version-container" (mouseenter)="showGlobe = true" (mouseleave)="showGlobe = false">
+            <span class="version-text" *ngIf="!showGlobe">v 1.4</span>
+           
+<a routerLink="/globe" *ngIf="showGlobe" routerLinkActive="active" class="version-link">
+    <i class="fas fa-globe"></i>
+</a>
+
+        </span>
+    </p>
+</div>

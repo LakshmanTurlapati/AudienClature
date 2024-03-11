@@ -1,0 +1,14 @@
+/* sphere.component.scss */
+.globe-container {
+    margin: 0;
+    width: 100%;
+    height: 100vh; // This will make the container take the full height of the viewport
+    overflow: hidden; // Prevent scrolling if the canvas is larger than the window
+  
+    canvas {
+      display: block; // Ensures there is no margin or padding around the canvas
+      width: 100%;
+      height: 100%;
+    }
+  }
+  
